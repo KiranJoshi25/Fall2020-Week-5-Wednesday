@@ -1,14 +1,81 @@
-<!DOCTYPE html>
+<!Doctype Html>
+
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Horizontal Stacked Bar Chart</title>
-    <script src="../libs/d3/d3.min.js"></script>
+    <title> Line Chart</title>
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+<style>
+    path{
+        stroke-width: 4px;
+        fill: none;
+    }
+    path.EstimatedCost{
+        stroke: blue;
 
+    }
+    path.RawMaterial{
+        stroke: red;
+
+    }
+    path.YearlyStorage{
+        stroke: yellow;
+
+    }
+    path.Workmanship{
+        stroke: green;
+    }
+</style>
 </head>
 <body>
-<div style="width: 80%"></div>
+<svg width="100%" height="90%" viewBox="0 0 1000 600"
+     style="background-color: tan">
+
+</svg>
 <script>
+    let margins = {x:100, y:100};
+    let svg  = d3.select('svg');
+    d3.csv("https://raw.githubusercontent.com/KiranJoshi25/Fall2020-Week-5-Wednesday/master/Exercise_Wed%205.1/data_sample.csv",d3.autoType)
+    .then(function (data){
+        let rng = svg.attr('viewBox').split(' ')
+        rng = d3.map(rng,function (d){return parseInt(d)})
+        let xRng = [rng[0] + margins.x,rng[2] - margins.x];
+        let yRng = [rng[1]+ margins.y,rng[3]- margins.y];
+        let date_extent = d3.extent(data,function (d){ return d.date})
+        let EstimatedCost_extent = d3.extent(data, function (d){return d.EstimatedCost})
+        let RawMaterial_extent = d3.extent(data, function (d){return d.RawMaterial})
+        let Workmanship_extent = d3.extent(data, function (d){return d.Workmanship})
+        let YearlyStorage_extent = d3.extent(data, function (d){return d.YearlyStorage})
+        let xScale = d3.scaleTime().domain(date_extent).range(xRng)
+        let yScale = d3.scaleLinear().domain(EstimatedCost_extent).range(yRng)
+        let cost_line = d3.line()
+            .x(function (d){return xScale(d.date)}).y(function (d){return yScale(d.EstimatedCost)})
+        let RawMaterial_line = d3.line()
+            .x(function (d){return xScale(d.date)}).y(function (d){return yScale(d.RawMaterial)})
+        let Workmanship_line = d3.line()
+            .x(function (d){return xScale(d.date)}).y(function (d){return yScale(d.Workmanship)})
+        let YearlyStorage_line = d3.line()
+            .x(function (d){return xScale(d.date)}).y(function (d){return yScale(d.YearlyStorage)})
+        let fig = svg.append('g');
+        fig = fig.data([data]);
+        fig.append('path').attr("d", function (d){return cost_line(d)})
+            .attr("class","EstimatedCost")
+        fig.append('path').attr("d", function (d){return RawMaterial_line(d)})
+            .attr("class","RawMaterial")
+        fig.append('path').attr("d", function (d){return Workmanship_line(d)})
+            .attr("class","Workmanship")
+        fig.append('path').attr("d", function (d){return YearlyStorage_line(d)})
+            .attr("class","YearlyStorage")
+        let xAxis = svg.append('g')
+            .attr('class',"axisStyle")
+            .attr('transform', 'translate('+(0)+','+(yRng[0])+")")
+            .call(d3.axisBottom(xScale));
+        let yAxis = svg.append('g')
+            .attr('class',"axisStyle")
+            .attr('transform', 'translate('+(margins.x)+','+(0)+")")
+            .call(d3.axisLeft(yScale));
+    })
+
 
 </script>
 </body>
