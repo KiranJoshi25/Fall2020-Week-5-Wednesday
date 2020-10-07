@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Area Chart</title>
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+    <style>
+        .paths{
+            opacity: .7;
+        }
+    </style>
+</head>
+<body>
+<h1>Area Chart</h1>
+<div style="width: 100%">
+    <svg id="main" width=100% height=100% viewbox="0 0 1000 500" style="background-color: tan"></svg>
+</div>
+<script>
+    let svg = d3.select('svg');
+    let margins = {x:10, y:100};
+    stackColors = ['#500869',
+        '#700C93',
+        '#9412C1',
+        '#BF18F9'];
+    d3.csv("https://raw.githubusercontent.com/KiranJoshi25/Fall2020-Week-5-Wednesday/master/Exercise_Wed%205.1/data_sample.csv",d3.autoType)
+        .then(function (data){
+            let stack = d3.stack()
+                .keys(['EstimatedCost','RawMaterial','Workmanship','YearlyStorage'])
+            let stackSeries = stack(data);
+            let rng = svg.attr('viewBox').split(' ');
+            rng = d3.map(rng, function(d){return parseInt(d)});
+            let xRng = [rng[0] + margins.x, rng[2] - margins.x];
+            let yRng = [rng[1] + margins.y, rng[3] - margins.y];
+            let x_extent = [0, data.length - 1]
+            let cost_extent = d3.extent(data,
+                function (d){return d.EstimatedCost})
+            cost_extent[0] = 0;
+            let xScale = d3.scaleLinear().domain(x_extent).range(xRng)
+            let yScale  = d3.scaleLinear().domain(cost_extent).range(yRng)
+            let area = d3.area()
+                .x(function(d,i){return xScale(i);})
+                .y0(function(d) {return yScale(d[0]);})
+                .y1(function(d) {return yScale(d[1]);})
+            svg.selectAll('path')
+                .data(stackSeries)
+                .enter()
+                .append('path')
+                .style('fill', function(d,i){return stackColors[i];})
+                .attr('d', area)
+                .attr('class', 'paths');
+        })
+</script>
+</body>
+</html>
